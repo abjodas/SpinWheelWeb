@@ -1,52 +1,114 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import SpinWheel from "./SpinWheel";
 import AdminPage from "./AdminPage";
+import LoginPage from "./LoginPage";
+import { onAuthStateChange, signOutUser } from './services/authService';
 
 const App = () => {
-  const [currentPage, setCurrentPage] = useState("wheel"); // 'wheel', 'login', 'admin'
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [password, setPassword] = useState("");
-  const [loginError, setLoginError] = useState("");
+  const [currentPage, setCurrentPage] = useState("userLogin"); // 'userLogin', 'wheel', 'adminLogin', 'admin'
+  const [isUserAuthenticated, setIsUserAuthenticated] = useState(false);
+  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [adminPassword, setAdminPassword] = useState("");
+  const [adminLoginError, setAdminLoginError] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
 
-  const handleAdminLogin = () => {
-    if (password === "123456") {
-      setIsAuthenticated(true);
-      setCurrentPage("admin");
-      setLoginError("");
-      setPassword("");
-    } else {
-      setLoginError("Invalid password");
-      setPassword("");
+  // Listen to Firebase Auth state changes
+  useEffect(() => {
+    const unsubscribe = onAuthStateChange((user) => {
+      if (user) {
+        setIsUserAuthenticated(true);
+        setCurrentUser(user);
+        setCurrentPage("wheel");
+      } else {
+        setIsUserAuthenticated(false);
+        setCurrentUser(null);
+        setCurrentPage("userLogin");
+      }
+      setIsLoading(false);
+    });
+
+    // Cleanup subscription on unmount
+    return () => unsubscribe();
+  }, []);
+
+  const handleUserLogin = (user) => {
+    // Firebase Auth will handle state updates via onAuthStateChange
+    console.log('User logged in:', user);
+  };
+
+  const handleUserLogout = async () => {
+    try {
+      await signOutUser();
+      // Firebase Auth will handle state updates via onAuthStateChange
+      setIsAdminAuthenticated(false);
+      setAdminPassword("");
+      setAdminLoginError("");
+    } catch (error) {
+      console.error('Error signing out:', error);
     }
   };
 
-  const handleLogout = () => {
-    setIsAuthenticated(false);
-    setCurrentPage("wheel");
-    setPassword("");
-    setLoginError("");
+  const handleAdminLogin = () => {
+    if (adminPassword === "123456") {
+      setIsAdminAuthenticated(true);
+      setCurrentPage("admin");
+      setAdminLoginError("");
+      setAdminPassword("");
+    } else {
+      setAdminLoginError("Invalid password");
+      setAdminPassword("");
+    }
   };
 
-  const showLoginModal = currentPage === "login";
+  const handleAdminLogout = () => {
+    setIsAdminAuthenticated(false);
+    setCurrentPage("wheel");
+    setAdminPassword("");
+    setAdminLoginError("");
+  };
+
+  const showAdminLoginModal = currentPage === "adminLogin";
+
+  // Show loading screen while Firebase initializes
+  if (isLoading) {
+    return (
+      <div style={styles.loadingScreen}>
+        <div style={styles.loadingSpinner}></div>
+        <div style={styles.loadingText}>Loading...</div>
+      </div>
+    );
+  }
 
   return (
     <div style={styles.container}>
       {/* Navigation Bar */}
-      {currentPage !== "login" && (
+      {currentPage !== "adminLogin" && currentPage !== "userLogin" && (
         <nav style={styles.navbar}>
           <div style={styles.navContent}>
             <div style={styles.logo}>🎯 Shalina Healthcare</div>
             <div style={styles.navActions}>
               {currentPage === "wheel" && (
-                <button
-                  onClick={() => setCurrentPage("login")}
-                  style={styles.adminButton}
-                >
-                  🔧 Admin
-                </button>
+                <>
+                  <div style={styles.userInfo}>
+                    Welcome, {currentUser?.displayName || currentUser?.email?.split('@')[0]}!
+                  </div>
+                  <button
+                    onClick={() => setCurrentPage("adminLogin")}
+                    style={styles.adminButton}
+                  >
+                    🔧 Admin
+                  </button>
+                  <button
+                    onClick={handleUserLogout}
+                    style={styles.logoutButton}
+                  >
+                    🚪 Logout
+                  </button>
+                </>
               )}
               {currentPage === "admin" && (
-                <button onClick={handleLogout} style={styles.logoutButton}>
+                <button onClick={handleAdminLogout} style={styles.logoutButton}>
                   ← Back to Wheel
                 </button>
               )}
@@ -55,8 +117,8 @@ const App = () => {
         </nav>
       )}
 
-      {/* Login Modal */}
-      {showLoginModal && (
+      {/* Admin Login Modal */}
+      {showAdminLoginModal && (
         <div style={styles.modalOverlay}>
           <div style={styles.modal}>
             <div style={styles.modalHeader}>
@@ -76,16 +138,16 @@ const App = () => {
 
               <input
                 type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                value={adminPassword}
+                onChange={(e) => setAdminPassword(e.target.value)}
                 onKeyPress={(e) => e.key === "Enter" && handleAdminLogin()}
                 placeholder="Password"
                 style={styles.passwordInput}
                 autoFocus
               />
 
-              {loginError && (
-                <div style={styles.errorMessage}>{loginError}</div>
+              {adminLoginError && (
+                <div style={styles.errorMessage}>{adminLoginError}</div>
               )}
 
               <div style={styles.modalActions}>
@@ -106,11 +168,23 @@ const App = () => {
 
       {/* Page Content */}
       <div style={styles.pageContent}>
-        {currentPage === "wheel" && <SpinWheel />}
-        {currentPage === "admin" && isAuthenticated && (
-          <AdminPage onBack={handleLogout} />
+        {currentPage === "userLogin" && (
+          <LoginPage onLogin={handleUserLogin} />
+        )}
+        {currentPage === "wheel" && isUserAuthenticated && <SpinWheel />}
+        {currentPage === "admin" && isAdminAuthenticated && (
+          <AdminPage onBack={handleAdminLogout} />
         )}
       </div>
+
+      <style>
+        {`
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+        `}
+      </style>
     </div>
   );
 };
@@ -147,7 +221,17 @@ const styles = {
   },
   navActions: {
     display: "flex",
-    gap: "10px",
+    alignItems: "center",
+    gap: "15px",
+  },
+  userInfo: {
+    color: "white",
+    fontSize: "0.9rem",
+    fontWeight: "500",
+    padding: "8px 16px",
+    background: "rgba(255,255,255,0.1)",
+    borderRadius: "20px",
+    backdropFilter: "blur(10px)",
   },
   adminButton: {
     padding: "8px 20px",
@@ -273,6 +357,29 @@ const styles = {
     cursor: "pointer",
     fontSize: "1rem",
     fontWeight: "bold",
+  },
+  loadingScreen: {
+    minHeight: "100vh",
+    background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    fontFamily: '"Segoe UI", Tahoma, Geneva, Verdana, sans-serif',
+  },
+  loadingSpinner: {
+    width: "50px",
+    height: "50px",
+    border: "4px solid rgba(255,255,255,0.3)",
+    borderTop: "4px solid white",
+    borderRadius: "50%",
+    animation: "spin 1s linear infinite",
+    marginBottom: "20px",
+  },
+  loadingText: {
+    color: "white",
+    fontSize: "1.2rem",
+    fontWeight: "500",
   },
 };
 

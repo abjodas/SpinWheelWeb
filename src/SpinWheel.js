@@ -1,5 +1,8 @@
 import React, { useState, useRef, useEffect } from "react";
-import { getLocationDistributions, updateLocationSlots } from './services/distributionService';
+import {
+  getLocationDistributions,
+  updateLocationSlots,
+} from "./services/distributionService";
 
 const SpinWheel = () => {
   const [isSpinning, setIsSpinning] = useState(false);
@@ -20,8 +23,8 @@ const SpinWheel = () => {
         setLocationData(data);
         setError(null);
       } catch (err) {
-        console.error('Failed to fetch distributions:', err);
-        setError('Failed to load location data');
+        console.error("Failed to fetch distributions:", err);
+        setError("Failed to load location data");
         // Fallback to hardcoded data
         setLocationData({
           location1: { name: "Goma", slots: [80, 60, 45, 30, 20, 15, 10, 5] },
@@ -29,7 +32,7 @@ const SpinWheel = () => {
           location3: { name: "Beni", slots: [70, 50, 35, 20, 15, 10, 5, 2] },
           location4: { name: "Bukavu", slots: [65, 45, 30, 15, 10, 7, 3, 1] },
           location5: { name: "Kindu", slots: [85, 65, 48, 32, 22, 16, 11, 6] },
-          location6: { name: "Kalemie", slots: [70, 55, 42, 28, 20, 14, 9, 5] }
+          location6: { name: "Kalemie", slots: [70, 55, 42, 28, 20, 14, 9, 5] },
         });
       } finally {
         setLoading(false);
@@ -64,7 +67,7 @@ const SpinWheel = () => {
 
     // Safety check: if no slots are available, return null
     if (weightedNumbers.length === 0) {
-      console.warn('No slots available for current location:', currentLocation);
+      console.warn("No slots available for current location:", currentLocation);
       return null;
     }
 
@@ -158,10 +161,12 @@ const SpinWheel = () => {
 
     // Get target number first
     const targetNumber = getWeightedNumber();
-    
+
     // Check if no slots are available
     if (targetNumber === null) {
-      alert("⚠️ No slots available at this location. Please contact support or try another location.");
+      alert(
+        "⚠️ No slots available at this location. Please contact support or try another location."
+      );
       return;
     }
 
@@ -199,14 +204,14 @@ const SpinWheel = () => {
       const newSlots = locationData[currentLocation].slots.map((slots, index) =>
         index === targetNumber - 1 ? Math.max(0, slots - 1) : slots
       );
-      
+
       // Update Firebase
       try {
         await updateLocationSlots(currentLocation, newSlots);
       } catch (err) {
-        console.error('Failed to update slots in Firebase:', err);
+        console.error("Failed to update slots in Firebase:", err);
       }
-      
+
       // Update local state
       setLocationData((prevData) => ({
         ...prevData,
@@ -217,7 +222,6 @@ const SpinWheel = () => {
       }));
     }, 5000);
   };
-
 
   return (
     <div style={styles.container}>
@@ -239,7 +243,7 @@ const SpinWheel = () => {
             }}
           />
         ))}
-        
+
         {/* Magical sparkles */}
         {[...Array(20)].map((_, i) => (
           <div
@@ -258,7 +262,6 @@ const SpinWheel = () => {
       </div>
 
       <div style={styles.content}>
-
         {/* Loading State */}
         {loading && (
           <div style={styles.loadingContainer}>
@@ -272,20 +275,42 @@ const SpinWheel = () => {
           <div style={styles.errorContainer}>
             <div style={styles.errorText}>⚠️ {error}</div>
             <div style={styles.errorSubtext}>Using offline data</div>
-            <button 
+            <button
               onClick={async () => {
                 try {
-                  const { doc, setDoc } = await import('firebase/firestore');
+                  const { doc, setDoc } = await import("firebase/firestore");
                   const distributionsData = {
-                    location1: { name: "Goma", slots: [80, 60, 45, 30, 20, 15, 10, 5] },
-                    location2: { name: "Butembo", slots: [75, 55, 40, 25, 18, 12, 8, 4] },
-                    location3: { name: "Beni", slots: [70, 50, 35, 20, 15, 10, 5, 2] },
-                    location4: { name: "Bukavu", slots: [65, 45, 30, 15, 10, 7, 3, 1] },
-                    location5: { name: "Kindu", slots: [85, 65, 48, 32, 22, 16, 11, 6] },
-                    location6: { name: "Kalemie", slots: [70, 55, 42, 28, 20, 14, 9, 5] }
+                    location1: {
+                      name: "Goma",
+                      slots: [80, 60, 45, 30, 20, 15, 10, 5],
+                    },
+                    location2: {
+                      name: "Butembo",
+                      slots: [75, 55, 40, 25, 18, 12, 8, 4],
+                    },
+                    location3: {
+                      name: "Beni",
+                      slots: [70, 50, 35, 20, 15, 10, 5, 2],
+                    },
+                    location4: {
+                      name: "Bukavu",
+                      slots: [65, 45, 30, 15, 10, 7, 3, 1],
+                    },
+                    location5: {
+                      name: "Kindu",
+                      slots: [85, 65, 48, 32, 22, 16, 11, 6],
+                    },
+                    location6: {
+                      name: "Kalemie",
+                      slots: [70, 55, 42, 28, 20, 14, 9, 5],
+                    },
                   };
-                  const { db } = await import('./firebase');
-                  const distributionsDocRef = doc(db, "locations", "distributions");
+                  const { db } = await import("./firebase");
+                  const distributionsDocRef = doc(
+                    db,
+                    "locations",
+                    "distributions"
+                  );
                   await setDoc(distributionsDocRef, distributionsData);
                   alert("✅ Database setup complete! Refresh the page.");
                 } catch (err) {
@@ -301,34 +326,33 @@ const SpinWheel = () => {
 
         {!loading && (
           <>
+            {/* Location Selector */}
+            <div style={styles.selectorContainer}>
+              <select
+                value={currentLocation}
+                onChange={(e) => setCurrentLocation(e.target.value)}
+                style={styles.select}
+              >
+                <option value="location1">📍 Goma</option>
+                <option value="location2">📍 Butembo</option>
+                <option value="location3">📍 Beni</option>
+                <option value="location4">📍 Bukavu</option>
+                <option value="location5">📍 Kindu</option>
+                <option value="location6">📍 Kalemie</option>
+              </select>
+            </div>
 
-        {/* Location Selector */}
-        <div style={styles.selectorContainer}>
-          <select
-            value={currentLocation}
-            onChange={(e) => setCurrentLocation(e.target.value)}
-            style={styles.select}
-          >
-            <option value="location1">📍 Goma</option>
-            <option value="location2">📍 Butembo</option>
-            <option value="location3">📍 Beni</option>
-            <option value="location4">📍 Bukavu</option>
-            <option value="location5">📍 Kindu</option>
-            <option value="location6">📍 Kalemie</option>
-          </select>
-        </div>
-
-        {/* Wheel Container */}
-        <div style={styles.wheelContainer}>
-          {/* Wheel */}
-          <div style={styles.wheelOuter}>
-            <div
-              ref={wheelRef}
-              className="spinning-wheel"
-              style={{
-                ...styles.wheel,
-                transform: `rotate(${rotation}deg)`,
-                background: `conic-gradient(
+            {/* Wheel Container */}
+            <div style={styles.wheelContainer}>
+              {/* Wheel */}
+              <div style={styles.wheelOuter}>
+                <div
+                  ref={wheelRef}
+                  className="spinning-wheel"
+                  style={{
+                    ...styles.wheel,
+                    transform: `rotate(${rotation}deg)`,
+                    background: `conic-gradient(
                   from 0deg,
                   #FF6B6B 0deg 45deg,
                   #4ECDC4 45deg 90deg,
@@ -339,69 +363,70 @@ const SpinWheel = () => {
                   #98D8C8 270deg 315deg,
                   #F7DC6F 315deg 360deg
                 )`,
-                boxShadow: isSpinning
-                  ? "0 0 60px rgba(255, 215, 0, 0.8), 0 0 120px rgba(255, 215, 0, 0.4), 0 25px 50px rgba(0,0,0,0.4), inset 0 0 0 3px rgba(255,215,0,0.3)"
-                  : "0 0 30px rgba(255,255,255,0.2), 0 25px 50px rgba(0,0,0,0.4), inset 0 0 0 2px rgba(255,255,255,0.1)",
-                animation: !isSpinning ? "glow-pulse 3s ease-in-out infinite" : "none",
-              }}
-            >
-              {/* Numbers */}
-              {segments.map((segment) => (
-                <div
-                  key={segment.number}
-                  style={{
-                    ...styles.segmentNumber,
-                    transform: `rotate(${segment.angle + 22.5}deg)`,
+                    boxShadow: isSpinning
+                      ? "0 0 60px rgba(255, 215, 0, 0.8), 0 0 120px rgba(255, 215, 0, 0.4), 0 25px 50px rgba(0,0,0,0.4), inset 0 0 0 3px rgba(255,215,0,0.3)"
+                      : "0 0 30px rgba(255,255,255,0.2), 0 25px 50px rgba(0,0,0,0.4), inset 0 0 0 2px rgba(255,255,255,0.1)",
+                    animation: !isSpinning
+                      ? "glow-pulse 3s ease-in-out infinite"
+                      : "none",
                   }}
                 >
-                  <div
-                    style={{
-                      ...styles.numberText,
-                      transform: `translateY(-155px) rotate(${
-                        -segment.angle - 22.5
-                      }deg)`,
-                    }}
-                  >
-                    {segment.number}
-                  </div>
+                  {/* Numbers */}
+                  {segments.map((segment) => (
+                    <div
+                      key={segment.number}
+                      style={{
+                        ...styles.segmentNumber,
+                        transform: `rotate(${segment.angle + 22.5}deg)`,
+                      }}
+                    >
+                      <div
+                        style={{
+                          ...styles.numberText,
+                          transform: `translateY(-155px) rotate(${
+                            -segment.angle - 22.5
+                          }deg)`,
+                        }}
+                      >
+                        {segment.number}
+                      </div>
+                    </div>
+                  ))}
+
+                  {/* Center Circle */}
+                  <div style={styles.centerCircle}>🎲</div>
                 </div>
-              ))}
-
-              {/* Center Circle */}
-              <div style={styles.centerCircle}>🎲</div>
+              </div>
             </div>
-          </div>
-        </div>
 
-        {/* Spin Button */}
-        <button
-          onClick={spin}
-          disabled={isSpinning}
-          className="spin-button"
-          style={{
-            ...styles.spinButton,
-            ...(isSpinning
-              ? styles.spinButtonDisabled
-              : styles.spinButtonActive),
-          }}
-        >
-          {isSpinning ? "SPINNING..." : "SPIN TO WIN!"}
-        </button>
+            {/* Spin Button */}
+            <button
+              onClick={spin}
+              disabled={isSpinning}
+              className="spin-button"
+              style={{
+                ...styles.spinButton,
+                ...(isSpinning
+                  ? styles.spinButtonDisabled
+                  : styles.spinButtonActive),
+              }}
+            >
+              {isSpinning ? "SPINNING..." : "SPIN TO WIN!"}
+            </button>
 
-        {/* Result Display */}
-        {result && (
-          <div className="result-display" style={styles.resultContainer}>
-            <div style={styles.resultNumber}>{result}</div>
-            <div style={styles.resultText}>
-              🎊 Congratulations! 🎊
-              <br />
-              You won number <strong>{result}</strong> at{" "}
-              {locationData[currentLocation].name}!
-            </div>
-          </div>
-        )}
-
-        </>
+            {/* Result Display */}
+            {result && (
+              <div className="result-display" style={styles.resultContainer}>
+                <div style={styles.resultNumber}>{result}</div>
+                <div style={styles.resultText}>
+                  🎊 Felicitations! 🎊
+                  <br />
+                  Vous avez gagné le numéro <strong>{result}</strong> at{" "}
+                  {locationData[currentLocation].name}!
+                </div>
+              </div>
+            )}
+          </>
         )}
       </div>
 
@@ -523,7 +548,8 @@ const SpinWheel = () => {
 const styles = {
   container: {
     minHeight: "calc(100vh - 60px)",
-    background: "radial-gradient(circle at 20% 50%, #667eea 0%, transparent 50%), radial-gradient(circle at 80% 20%, #764ba2 0%, transparent 50%), radial-gradient(circle at 40% 80%, #f093fb 0%, transparent 50%), linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)",
+    background:
+      "radial-gradient(circle at 20% 50%, #667eea 0%, transparent 50%), radial-gradient(circle at 80% 20%, #764ba2 0%, transparent 50%), radial-gradient(circle at 40% 80%, #f093fb 0%, transparent 50%), linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
@@ -573,7 +599,8 @@ const styles = {
     transition: "all 0.3s ease",
     outline: "none",
     appearance: "none",
-    backgroundImage: "url('data:image/svg+xml;charset=US-ASCII,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 4 5\"><path fill=\"%23333\" d=\"M2 0L0 2h4zm0 5L0 3h4z\"/></svg>')",
+    backgroundImage:
+      'url(\'data:image/svg+xml;charset=US-ASCII,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 4 5"><path fill="%23333" d="M2 0L0 2h4zm0 5L0 3h4z"/></svg>\')',
     backgroundRepeat: "no-repeat",
     backgroundPosition: "right 16px center",
     backgroundSize: "12px",
@@ -630,13 +657,15 @@ const styles = {
     transform: "translate(-50%, -50%)",
     width: "80px",
     height: "80px",
-    background: "linear-gradient(135deg, #FFD700 0%, #FFA500 50%, #FF8C00 100%)",
+    background:
+      "linear-gradient(135deg, #FFD700 0%, #FFA500 50%, #FF8C00 100%)",
     borderRadius: "50%",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
     fontSize: "2rem",
-    boxShadow: "0 0 30px rgba(255,215,0,0.8), 0 0 60px rgba(255,215,0,0.4), 0 4px 15px rgba(0,0,0,0.3)",
+    boxShadow:
+      "0 0 30px rgba(255,215,0,0.8), 0 0 60px rgba(255,215,0,0.4), 0 4px 15px rgba(0,0,0,0.3)",
     zIndex: 10,
     border: "4px solid #FFFFFF",
     backdropFilter: "none",
