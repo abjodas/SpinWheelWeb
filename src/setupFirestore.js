@@ -21,7 +21,9 @@
     location3: { name: "Beni", slots: [70, 50, 35, 20, 15, 10, 5, 2] },
     location4: { name: "Bukavu", slots: [65, 45, 30, 15, 10, 7, 3, 1] },
     location5: { name: "Kindu", slots: [85, 65, 48, 32, 22, 16, 11, 6] },
-    location6: { name: "Kalemie", slots: [70, 55, 42, 28, 20, 14, 9, 5] }
+    location6: { name: "Kalemie", slots: [70, 55, 42, 28, 20, 14, 9, 5] },
+    location7: { name: "Bunia", slots: [75, 58, 42, 28, 18, 12, 7, 4] },
+    location8: { name: "Uvira", slots: [72, 55, 40, 25, 16, 11, 6, 3] }
   };
 
   try {
@@ -59,7 +61,9 @@ export const setupFirestoreInBrowser = async () => {
     location3: { name: "Beni", slots: [70, 50, 35, 20, 15, 10, 5, 2] },
     location4: { name: "Bukavu", slots: [65, 45, 30, 15, 10, 7, 3, 1] },
     location5: { name: "Kindu", slots: [85, 65, 48, 32, 22, 16, 11, 6] },
-    location6: { name: "Kalemie", slots: [70, 55, 42, 28, 20, 14, 9, 5] }
+    location6: { name: "Kalemie", slots: [70, 55, 42, 28, 20, 14, 9, 5] },
+    location7: { name: "Bunia", slots: [75, 58, 42, 28, 18, 12, 7, 4] },
+    location8: { name: "Uvira", slots: [72, 55, 40, 25, 16, 11, 6, 3] }
   };
 
   try {

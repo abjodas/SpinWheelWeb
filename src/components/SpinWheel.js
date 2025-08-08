@@ -33,6 +33,8 @@ const SpinWheel = () => {
           location4: { name: "Bukavu", slots: [65, 45, 30, 15, 10, 7, 3, 1] },
           location5: { name: "Kindu", slots: [85, 65, 48, 32, 22, 16, 11, 6] },
           location6: { name: "Kalemie", slots: [70, 55, 42, 28, 20, 14, 9, 5] },
+          location7: { name: "Bunia", slots: [75, 58, 42, 28, 18, 12, 7, 4] },
+          location8: { name: "Uvira", slots: [72, 55, 40, 25, 16, 11, 6, 3] },
         });
       } finally {
         setLoading(false);
@@ -304,6 +306,14 @@ const SpinWheel = () => {
                       name: "Kalemie",
                       slots: [70, 55, 42, 28, 20, 14, 9, 5],
                     },
+                    location7: {
+                      name: "Bunia",
+                      slots: [75, 58, 42, 28, 18, 12, 7, 4],
+                    },
+                    location8: {
+                      name: "Uvira",
+                      slots: [72, 55, 40, 25, 16, 11, 6, 3],
+                    },
                   };
                   const { db } = await import("./firebase");
                   const distributionsDocRef = doc(
@@ -339,6 +349,8 @@ const SpinWheel = () => {
                 <option value="location4">📍 Bukavu</option>
                 <option value="location5">📍 Kindu</option>
                 <option value="location6">📍 Kalemie</option>
+                <option value="location7">📍 Bunia</option>
+                <option value="location8">📍 Uvira</option>
               </select>
             </div>
 

@@ -11,7 +11,7 @@ const LoginPage = ({ onLogin }) => {
     e.preventDefault();
     
     if (!email || !password) {
-      setLoginError('Please enter both email and password');
+      setLoginError('Veuillez saisir l\'adresse e-mail et le mot de passe');
       return;
     }
 
@@ -27,7 +27,7 @@ const LoginPage = ({ onLogin }) => {
         setLoginError(result.message);
       }
     } catch (error) {
-      setLoginError('An unexpected error occurred');
+      setLoginError('Une erreur inattendue s\'est produite');
     } finally {
       setIsLoading(false);
     }
@@ -66,7 +66,7 @@ const LoginPage = ({ onLogin }) => {
           <div style={styles.inputGroup}>
             <input
               type="email"
-              placeholder="Email Address"
+              placeholder="Adresse e-mail"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               style={styles.input}
@@ -77,7 +77,7 @@ const LoginPage = ({ onLogin }) => {
           <div style={styles.inputGroup}>
             <input
               type="password"
-              placeholder="Password"
+              placeholder="Mot de passe"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               style={styles.input}
@@ -102,10 +102,10 @@ const LoginPage = ({ onLogin }) => {
             {isLoading ? (
               <>
                 <div style={styles.spinner}></div>
-                Signing in...
+                Connexion en cours...
               </>
             ) : (
-              'Sign In'
+              'Se connecter'
             )}
           </button>
         </form>

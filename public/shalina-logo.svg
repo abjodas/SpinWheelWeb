@@ -1,0 +1,8 @@
+<svg width="120" height="60" viewBox="0 0 120 60" xmlns="http://www.w3.org/2000/svg">
+  <!-- Shalina Healthcare Logo - Oval with text -->
+  <ellipse cx="60" cy="30" rx="58" ry="28" fill="none" stroke="#4A5D8A" stroke-width="3"/>
+  <ellipse cx="60" cy="30" rx="50" ry="20" fill="none" stroke="#4A5D8A" stroke-width="2"/>
+  
+  <text x="60" y="24" font-family="Arial, sans-serif" font-size="14" font-weight="bold" text-anchor="middle" fill="#4A5D8A">Shalina</text>
+  <text x="60" y="38" font-family="Arial, sans-serif" font-size="8" text-anchor="middle" fill="#4A5D8A">Healthcare</text>
+</svg>

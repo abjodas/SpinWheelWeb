@@ -1,17 +1,29 @@
 import React, { useState, useEffect } from "react";
 import SpinWheel from "./SpinWheel";
 import AdminPage from "./AdminPage";
+import ReportsPage from "./ReportsPage";
 import LoginPage from "./LoginPage";
 import { onAuthStateChange, signOutUser } from './services/authService';
 
 const App = () => {
-  const [currentPage, setCurrentPage] = useState("userLogin"); // 'userLogin', 'wheel', 'adminLogin', 'admin'
+  // Get saved page from localStorage or default to userLogin
+  const [currentPage, setCurrentPage] = useState(() => {
+    return localStorage.getItem('currentPage') || "userLogin";
+  }); // 'userLogin', 'wheel', 'adminLogin', 'admin', 'reports'
   const [isUserAuthenticated, setIsUserAuthenticated] = useState(false);
-  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
+  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(() => {
+    return localStorage.getItem('isAdminAuthenticated') === 'true' || false;
+  });
   const [currentUser, setCurrentUser] = useState(null);
   const [adminPassword, setAdminPassword] = useState("");
   const [adminLoginError, setAdminLoginError] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+
+  // Helper function to navigate and save state
+  const navigateTo = (page) => {
+    setCurrentPage(page);
+    localStorage.setItem('currentPage', page);
+  };
 
   // Listen to Firebase Auth state changes
   useEffect(() => {
@@ -19,11 +31,19 @@ const App = () => {
       if (user) {
         setIsUserAuthenticated(true);
         setCurrentUser(user);
-        setCurrentPage("wheel");
+        // Only set to wheel if no saved page or if saved page is userLogin
+        const savedPage = localStorage.getItem('currentPage');
+        if (!savedPage || savedPage === "userLogin") {
+          setCurrentPage("wheel");
+          localStorage.setItem('currentPage', "wheel");
+        }
       } else {
         setIsUserAuthenticated(false);
         setCurrentUser(null);
         setCurrentPage("userLogin");
+        localStorage.setItem('currentPage', "userLogin");
+        // Clear admin auth when user logs out
+        localStorage.removeItem('isAdminAuthenticated');
       }
       setIsLoading(false);
     });
@@ -44,28 +64,31 @@ const App = () => {
       setIsAdminAuthenticated(false);
       setAdminPassword("");
       setAdminLoginError("");
+      localStorage.removeItem('isAdminAuthenticated');
     } catch (error) {
       console.error('Error signing out:', error);
     }
   };
 
   const handleAdminLogin = () => {
-    if (adminPassword === "123456") {
+    if (adminPassword === "ShAlInA*2025*LuCkY#") {
       setIsAdminAuthenticated(true);
-      setCurrentPage("admin");
+      navigateTo("admin");
       setAdminLoginError("");
       setAdminPassword("");
+      localStorage.setItem('isAdminAuthenticated', 'true');
     } else {
-      setAdminLoginError("Invalid password");
+      setAdminLoginError("Mot de passe invalide");
       setAdminPassword("");
     }
   };
 
   const handleAdminLogout = () => {
     setIsAdminAuthenticated(false);
-    setCurrentPage("wheel");
+    navigateTo("wheel");
     setAdminPassword("");
     setAdminLoginError("");
+    localStorage.removeItem('isAdminAuthenticated');
   };
 
   const showAdminLoginModal = currentPage === "adminLogin";
@@ -75,7 +98,7 @@ const App = () => {
     return (
       <div style={styles.loadingScreen}>
         <div style={styles.loadingSpinner}></div>
-        <div style={styles.loadingText}>Loading...</div>
+        <div style={styles.loadingText}>Chargement...</div>
       </div>
     );
   }
@@ -86,15 +109,18 @@ const App = () => {
       {currentPage !== "adminLogin" && currentPage !== "userLogin" && (
         <nav style={styles.navbar}>
           <div style={styles.navContent}>
-            <div style={styles.logo}>🎯 Shalina Healthcare</div>
+            <div style={styles.logo}>
+              <img 
+                src="/shalina-logo.svg" 
+                alt="Shalina Healthcare" 
+                style={styles.logoImage}
+              />
+            </div>
             <div style={styles.navActions}>
               {currentPage === "wheel" && (
                 <>
-                  <div style={styles.userInfo}>
-                    Welcome, {currentUser?.displayName || currentUser?.email?.split('@')[0]}!
-                  </div>
                   <button
-                    onClick={() => setCurrentPage("adminLogin")}
+                    onClick={() => navigateTo("adminLogin")}
                     style={styles.adminButton}
                   >
                     🔧 Admin
@@ -103,13 +129,18 @@ const App = () => {
                     onClick={handleUserLogout}
                     style={styles.logoutButton}
                   >
-                    🚪 Logout
+                    🚪 Déconnexion
                   </button>
                 </>
               )}
               {currentPage === "admin" && (
                 <button onClick={handleAdminLogout} style={styles.logoutButton}>
-                  ← Back to Wheel
+                  ← Retour à la roue
+                </button>
+              )}
+              {currentPage === "reports" && (
+                <button onClick={() => navigateTo("admin")} style={styles.logoutButton}>
+                  ← Retour à l'admin
                 </button>
               )}
             </div>
@@ -122,9 +153,9 @@ const App = () => {
         <div style={styles.modalOverlay}>
           <div style={styles.modal}>
             <div style={styles.modalHeader}>
-              <h2 style={styles.modalTitle}>🔐 Admin Access</h2>
+              <h2 style={styles.modalTitle}>🔐 Accès Administrateur</h2>
               <button
-                onClick={() => setCurrentPage("wheel")}
+                onClick={() => navigateTo("wheel")}
                 style={styles.closeButton}
               >
                 ✕
@@ -133,7 +164,7 @@ const App = () => {
 
             <div style={styles.modalContent}>
               <p style={styles.modalText}>
-                Enter admin password to access distribution settings:
+                Entrez le mot de passe administrateur pour accéder aux paramètres de distribution:
               </p>
 
               <input
@@ -141,7 +172,7 @@ const App = () => {
                 value={adminPassword}
                 onChange={(e) => setAdminPassword(e.target.value)}
                 onKeyPress={(e) => e.key === "Enter" && handleAdminLogin()}
-                placeholder="Password"
+                placeholder="Mot de passe"
                 style={styles.passwordInput}
                 autoFocus
               />
@@ -152,13 +183,13 @@ const App = () => {
 
               <div style={styles.modalActions}>
                 <button
-                  onClick={() => setCurrentPage("wheel")}
+                  onClick={() => navigateTo("wheel")}
                   style={styles.cancelButton}
                 >
-                  Cancel
+                  Annuler
                 </button>
                 <button onClick={handleAdminLogin} style={styles.loginButton}>
-                  Login
+                  Connexion
                 </button>
               </div>
             </div>
@@ -173,7 +204,13 @@ const App = () => {
         )}
         {currentPage === "wheel" && isUserAuthenticated && <SpinWheel />}
         {currentPage === "admin" && isAdminAuthenticated && (
-          <AdminPage onBack={handleAdminLogout} />
+          <AdminPage 
+            onBack={handleAdminLogout} 
+            onViewReports={() => navigateTo("reports")}
+          />
+        )}
+        {currentPage === "reports" && isUserAuthenticated && (
+          <ReportsPage onBack={() => navigateTo("admin")} />
         )}
       </div>
 
@@ -214,24 +251,20 @@ const styles = {
     padding: "0 20px",
   },
   logo: {
-    color: "white",
-    fontSize: "1.5rem",
-    fontWeight: "bold",
-    fontFamily: '"Segoe UI", Tahoma, Geneva, Verdana, sans-serif',
+    display: "flex",
+    alignItems: "center",
+  },
+  logoImage: {
+    height: "clamp(35px, 5vh, 45px)",
+    width: "auto",
+    maxWidth: "200px",
+    filter: "brightness(0) invert(1)",
+    transition: "all 0.3s ease",
   },
   navActions: {
     display: "flex",
     alignItems: "center",
     gap: "15px",
-  },
-  userInfo: {
-    color: "white",
-    fontSize: "0.9rem",
-    fontWeight: "500",
-    padding: "8px 16px",
-    background: "rgba(255,255,255,0.1)",
-    borderRadius: "20px",
-    backdropFilter: "blur(10px)",
   },
   adminButton: {
     padding: "8px 20px",
@@ -276,8 +309,10 @@ const styles = {
     borderRadius: "20px",
     width: "90%",
     maxWidth: "400px",
+    minWidth: "320px",
     overflow: "hidden",
     boxShadow: "0 20px 60px rgba(0,0,0,0.3)",
+    margin: "0 auto",
   },
   modalHeader: {
     background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
@@ -308,6 +343,7 @@ const styles = {
   },
   modalContent: {
     padding: "30px",
+    boxSizing: "border-box",
   },
   modalText: {
     color: "#555",
@@ -323,6 +359,7 @@ const styles = {
     marginBottom: "15px",
     outline: "none",
     transition: "border-color 0.3s ease",
+    boxSizing: "border-box",
   },
   errorMessage: {
     color: "#e74c3c",
@@ -335,8 +372,9 @@ const styles = {
   },
   modalActions: {
     display: "flex",
-    gap: "10px",
-    justifyContent: "flex-end",
+    gap: "15px",
+    justifyContent: "center",
+    marginTop: "10px",
   },
   cancelButton: {
     padding: "12px 25px",

@@ -14,7 +14,7 @@ export const signInUser = async (email, password) => {
     return {
       success: true,
       user: userCredential.user,
-      message: 'Successfully signed in!'
+      message: 'Connexion réussie!'
     };
   } catch (error) {
     console.error('Error signing in user:', error);
@@ -35,13 +35,13 @@ export const signOutUser = async () => {
     await signOut(auth);
     return {
       success: true,
-      message: 'Successfully signed out!'
+      message: 'Déconnexion réussie!'
     };
   } catch (error) {
     return {
       success: false,
       error: error.code,
-      message: 'Error signing out'
+      message: 'Erreur lors de la déconnexion'
     };
   }
 };
@@ -60,29 +60,29 @@ export const getCurrentUser = () => {
 const getErrorMessage = (errorCode) => {
   switch (errorCode) {
     case 'auth/user-not-found':
-      return 'No account found with this email address.';
+      return 'Aucun compte trouvé avec cette adresse e-mail.';
     case 'auth/wrong-password':
-      return 'Incorrect password.';
+      return 'Mot de passe incorrect.';
     case 'auth/invalid-email':
-      return 'Please enter a valid email address.';
+      return 'Veuillez saisir une adresse e-mail valide.';
     case 'auth/too-many-requests':
-      return 'Too many failed attempts. Please try again later.';
+      return 'Trop de tentatives échouées. Veuillez réessayer plus tard.';
     case 'auth/network-request-failed':
-      return 'Network error. Please check your connection.';
+      return 'Erreur réseau. Veuillez vérifier votre connexion.';
     case 'auth/invalid-credential':
-      return 'Invalid email or password.';
+      return 'Adresse e-mail ou mot de passe invalide.';
     case 'auth/operation-not-allowed':
-      return 'Email/password accounts are not enabled. Please contact support.';
+      return 'Les comptes e-mail/mot de passe ne sont pas activés. Veuillez contacter le support.';
     case 'auth/admin-restricted-operation':
-      return 'This operation is restricted. Please contact support.';
+      return 'Cette opération est restreinte. Veuillez contacter le support.';
     case 'auth/argument-error':
-      return 'Invalid authentication configuration.';
+      return 'Configuration d\'authentification invalide.';
     case 'auth/app-not-authorized':
-      return 'App not authorized to use Firebase Authentication.';
+      return 'Application non autorisée à utiliser l\'authentification Firebase.';
     case 'auth/configuration-not-found':
-      return 'Firebase configuration error. Please contact support.';
+      return 'Erreur de configuration Firebase. Veuillez contacter le support.';
     default:
       console.error('Unhandled auth error code:', errorCode);
-      return `Authentication error (${errorCode}). Please try again or contact support.`;
+      return `Erreur d'authentification (${errorCode}). Veuillez réessayer ou contacter le support.`;
   }
 };
